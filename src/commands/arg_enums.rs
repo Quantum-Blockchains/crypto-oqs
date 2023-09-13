@@ -1,11 +1,11 @@
-use std::str::FromStr;
 use super::error::CryptoError;
+use std::str::FromStr;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Algorithm {
     Dilithium2,
     Dilithium3,
-    Dilithium5
+    Dilithium5,
 }
 
 impl FromStr for Algorithm {
@@ -27,7 +27,7 @@ impl FromStr for Algorithm {
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Format {
     PEM,
-    DER
+    DER,
 }
 
 impl FromStr for Format {

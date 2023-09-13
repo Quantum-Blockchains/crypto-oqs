@@ -1,33 +1,29 @@
+use super::{
+    arg_enums::{Algorithm, Format},
+    asc1_dilithium::{
+        AlgorithmIdentifier, OneAsymmetricKeyBorrowed, OID_DILITHIUM2, OID_DILITHIUM3,
+        OID_DILITHIUM5,
+    },
+    error::CryptoError,
+    utils,
+};
+use clap::Parser;
+use der::{pem::LineEnding, Encode, EncodePem};
 use oqs::sig;
 use rand::*;
-use clap::Parser;
-use super::{
-    utils,
-    error::CryptoError,
-    arg_enums::{Algorithm, Format},
-    asc1_dilithium::{AlgorithmIdentifier, OneAsymmetricKeyBorrowed,
-        OID_DILITHIUM2, OID_DILITHIUM3, OID_DILITHIUM5}
-};
-use der::{ Encode, pem::LineEnding, EncodePem };
 
 #[derive(Debug, Clone, Parser)]
 #[clap(name = "generate", about = "Generate key pair")]
 pub struct GenerateCmd {
     ///Algorithm for key pair generation (dilithium2 or dil2, dilithium3 or dil3, dilithium5 or dil5)
-    #[clap(short = 'a', long="algorithm")]
+    #[clap(short = 'a', long = "algorithm")]
     pub algorithm: Algorithm,
     ///Output format (DER or PEM)
     #[clap(long = "outform", value_name = "PEM|DER", default_value = "PEM")]
     pub outform: Format,
-    ///Path for writing the secret key to the file
-    #[clap(long="out", value_name = "FILE")]
+    ///Output file
+    #[clap(long = "out", value_name = "FILE")]
     pub secret_output_path: Option<String>,
-    // ///Path for writing the public key to the file
-    // #[clap(long="pub", value_name = "FILE")]
-    // pub public_output_path: Option<String>,
-    // ///URL to get entropy from QRNG for key pair generation
-    // #[clap(long="entropy", value_name = "ENTROPY")]
-    // pub entropy: Option<String>,
 }
 
 impl GenerateCmd {
@@ -43,21 +39,18 @@ impl GenerateCmd {
                 let algorithm_identifier = AlgorithmIdentifier {
                     algorithm: OID_DILITHIUM2.parse().unwrap(),
                 };
-                // let keypair = dilithium2::Keypair::generate(Some(&seed));
 
-                let sigalg = match sig::Sig::new(sig::Algorithm::Dilithium2){
+                let sigalg = match sig::Sig::new(sig::Algorithm::Dilithium2) {
                     Ok(s) => s,
-                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string()))
+                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string())),
                 };
-                let (a_sig_pk, a_sig_sk) = match sigalg.keypair(){
+                let (a_sig_pk, a_sig_sk) = match sigalg.keypair() {
                     Ok((pk, sk)) => (pk, sk),
-                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string()))
+                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string())),
                 };
                 let mut vec1 = a_sig_sk.into_vec();
                 let mut vec2 = a_sig_pk.into_vec();
 
-                // let mut bytes_keypair = keypair.to_bytes().to_vec();
-                
                 vector_bytes_private_key.push(0x0F);
                 vector_bytes_private_key.push(0x00);
                 vector_bytes_private_key.append(&mut vec1);
@@ -68,7 +61,6 @@ impl GenerateCmd {
                     private_key_algorithm: algorithm_identifier,
                     private_key: &vector_bytes_private_key,
                 };
-                
 
                 if self.outform == Format::DER {
                     let der = der_private_key.to_der().unwrap();
@@ -77,33 +69,26 @@ impl GenerateCmd {
                     let pem = der_private_key.to_pem(LineEnding::LF).unwrap();
                     utils::output(pem.as_bytes(), &self.secret_output_path);
                 }
-                
-                // let keypair = dilithium2::Keypair::generate(Some(&seed));
-                // let secret = keypair.secret.bytes;
-                // let public = keypair.public.bytes;
-                // utils::output(&secret, &self.secret_output_path, "SECRET KEY".to_string());
-                // utils::output(&public, &self.public_output_path, "PUBLIC KEY".to_string());
             }
             Algorithm::Dilithium3 => {
                 let algorithm_identifier = AlgorithmIdentifier {
                     algorithm: OID_DILITHIUM3.parse().unwrap(),
                 };
-                // let keypair = dilithium3::Keypair::generate(Some(&seed));
-                // let mut bytes_keypair = keypair.to_bytes().to_vec();
-                let sigalg = match sig::Sig::new(sig::Algorithm::Dilithium3){
+
+                let sigalg = match sig::Sig::new(sig::Algorithm::Dilithium3) {
                     Ok(s) => s,
-                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string()))
+                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string())),
                 };
-                let (a_sig_pk, a_sig_sk) = match sigalg.keypair(){
+                let (a_sig_pk, a_sig_sk) = match sigalg.keypair() {
                     Ok((pk, sk)) => (pk, sk),
-                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string()))
+                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string())),
                 };
                 let mut vec1 = a_sig_sk.into_vec();
                 let mut vec2 = a_sig_pk.into_vec();
-                
+
                 vector_bytes_private_key.push(0x17);
                 vector_bytes_private_key.push(0x40);
-                // vector_bytes_private_key.append(&mut bytes_keypair);
+
                 vector_bytes_private_key.append(&mut vec1);
                 vector_bytes_private_key.append(&mut vec2);
 
@@ -112,7 +97,6 @@ impl GenerateCmd {
                     private_key_algorithm: algorithm_identifier,
                     private_key: &vector_bytes_private_key,
                 };
-                
 
                 if self.outform == Format::DER {
                     let der = der_private_key.to_der().unwrap();
@@ -126,22 +110,21 @@ impl GenerateCmd {
                 let algorithm_identifier = AlgorithmIdentifier {
                     algorithm: OID_DILITHIUM5.parse().unwrap(),
                 };
-                // let keypair = dilithium5::Keypair::generate(Some(&seed));
-                // let mut bytes_keypair = keypair.to_bytes().to_vec();
-                let sigalg = match sig::Sig::new(sig::Algorithm::Dilithium5){
+
+                let sigalg = match sig::Sig::new(sig::Algorithm::Dilithium5) {
                     Ok(s) => s,
-                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string()))
+                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string())),
                 };
-                let (a_sig_pk, a_sig_sk) = match sigalg.keypair(){
+                let (a_sig_pk, a_sig_sk) = match sigalg.keypair() {
                     Ok((pk, sk)) => (pk, sk),
-                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string()))
+                    Err(err) => return Err(CryptoError::GenerateKeys(err.to_string())),
                 };
                 let mut vec1 = a_sig_sk.into_vec();
                 let mut vec2 = a_sig_pk.into_vec();
-                
+
                 vector_bytes_private_key.push(0x1D);
                 vector_bytes_private_key.push(0x20);
-                // vector_bytes_private_key.append(&mut bytes_keypair);
+
                 vector_bytes_private_key.append(&mut vec1);
                 vector_bytes_private_key.append(&mut vec2);
 
@@ -150,7 +133,6 @@ impl GenerateCmd {
                     private_key_algorithm: algorithm_identifier,
                     private_key: &vector_bytes_private_key,
                 };
-                
 
                 if self.outform == Format::DER {
                     let der = der_private_key.to_der().unwrap();
@@ -167,93 +149,40 @@ impl GenerateCmd {
 
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
-    use std::fs;
     use super::*;
+    use std::fs;
+    use std::path::Path;
 
     #[test]
     fn generate_dilithium2() {
-        let generate = GenerateCmd::parse_from(&[
-            "generate",
-            "-a",
-            "dil2"
-        ]);
+        let generate = GenerateCmd::parse_from(&["generate", "-a", "dil2"]);
         assert!(generate.run().is_ok())
     }
 
     #[test]
     fn generate_dilithium3() {
-        let generate = GenerateCmd::parse_from(&[
-            "generate",
-            "-a",
-            "dil3"
-        ]);
+        let generate = GenerateCmd::parse_from(&["generate", "-a", "dil3"]);
         assert!(generate.run().is_ok())
     }
 
     #[test]
     fn generate_dilithium5() {
-        let generate = GenerateCmd::parse_from(&[
-            "generate",
-            "-a",
-            "dil5"
-        ]);
+        let generate = GenerateCmd::parse_from(&["generate", "-a", "dil5"]);
         assert!(generate.run().is_ok())
     }
 
     #[test]
     fn generate_dilithium2_and_write_keys_to_files() {
-        let test_sec_file = "sec_test";
-        let test_pub_file = "pub_test";
-        let generate = GenerateCmd::parse_from(&[
-            "generate",
-            "--algorithm",
-            "dil5",
-            "--sec",
-            test_sec_file,
-            "--pub",
-            test_pub_file,
-        ]);
+        let test_out_file = "out_test";
+        let generate =
+            GenerateCmd::parse_from(&["generate", "--algorithm", "dil5", "--out", test_out_file]);
         assert!(generate.run().is_ok());
-        let path_sec = Path::new(test_sec_file);
-        let path_pub = Path::new(test_pub_file);
+        let path_sec = Path::new(test_out_file);
         if path_sec.exists() {
-            fs::remove_file(test_sec_file).unwrap();
-            assert!(true);
-        } else {
-            assert!(false);
-        }
-        if path_pub.exists() {
-            fs::remove_file(test_pub_file).unwrap();
+            fs::remove_file(test_out_file).unwrap();
             assert!(true);
         } else {
             assert!(false);
         }
     }
-
-    // #[test]
-    // fn generate_keypair_with_entropy_from_qrng() {
-
-    //     let server = MockServer::start();
-    //     let url = server.base_url();
-
-    //     let generate = GenerateCmd::parse_from(&[
-    //         "generate",
-    //         "-a",
-    //         "dil5",
-    //         "--qrng",
-    //         &url,
-    //     ]);
-
-    //     let expected_response_qrng = QRNGResponseData { result :"RMbXrsa+UNk0/VPn9spdeDQhaecX4GX0HB3PIWMrIrE=".to_string()};
-
-    //     let _qrng_mock = server.mock(|when, then| {
-    //        when.method(GET)
-    //            .path("/qrng/base64");
-    //        then.status(200)
-    //            .header("content-type", "text/json")
-    //            .json_body(json!(expected_response_qrng));
-    //     });
-    //     assert!(generate.run().is_ok())
-    // }
 }

@@ -1,4 +1,4 @@
-# crypto
+# crypto-oqs
 Utility for generating, sign and verification message with Dilithium keys.
 ## Build
 1. install rust
@@ -22,18 +22,18 @@ Utility for generating, sign and verification message with Dilithium keys.
 ## Comands
 1. generate - generate key pair 
     ```bash
-   crypto generate --algorithm dilithium5 --out key.pem
+   crypto-oqs generate --algorithm dilithium5 --out key.pem
     ```
 2. public - pull the public key from the pair
     ```bash
-    crypto public --in key.pem --out pub.pem
+    crypto-oqs public --in key.pem --out pub.pem
     ```
 3. sign - sign the file
     ```bash
-    crypto sign --sec key.pem --out signature --file <PATH>
+    crypto-oqs sign --sec key.pem --out signature --file <PATH>
     ```
 4. verify - verification the file
    ```bash
-    crypto verify --sig signature --pub pub.pem --file <PATH>
+    crypto-oqs verify --sig signature --pub pub.pem --file <PATH>
     ```
 

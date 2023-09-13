@@ -19,5 +19,5 @@ pub enum CryptoError {
     #[error("Public key error: {0}")]
     SignError(String),
     #[error(transparent)]
-	Io(#[from] std::io::Error),
+    Io(#[from] std::io::Error),
 }
